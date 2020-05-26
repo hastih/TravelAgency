@@ -1,13 +1,9 @@
-# TravelAgency
 package TravelAgency;
+
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.UUID;
-
 
 import javafx.application.Application;
 import javafx.beans.property.SimpleObjectProperty;
@@ -25,657 +21,622 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.DatePicker;
-import javafx.scene.control.RadioButton;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
-import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
-public class Booking extends Application{
-	Stage window;
-	Scene BookingPage,PaymentPage, TicketPage;
-	private ArrayList<Airplane> dataSet = new ArrayList<>();
-	private String adult,child,infant,cabin="";
-	private Font myFont;
-	private String departure,destination,travelType="";
-	private String Fromdate,Todate;
-	private String ticketNumber="";
-	private String []chosenTime= new String[2]; 
-	private String []NameAirLine=new String[2];
-	private String[] NOSeats=new String[2];
+public class OrderMeal extends Application{
+	private ArrayList<Meal> ShoppingList =new ArrayList<>();
+	private String NumberOfTicket="";
+	private Text YourList = new Text("Your Shopping List");
+	private TableView<Meal> Mealtable = new TableView<Meal>();
+	private Button delete = new Button("Delete");
+	private Button ConfirmList = new Button("Confirm Your Shopping List");
+	private Scene PaymentPage;
+	private double TotalMealPrice=0;
 	@Override
-	public void start(Stage Stage) throws Exception {
-		window = Stage;
-		myFont = new Font("Segoe Print", 20);
-		Text fromText = new Text("From");
-		fromText.setStyle("-fx-background-color: #708090");
-		fromText.setFont(myFont);
-		Text ToText = new Text("To");
-		Text To2 = new Text("To");
-		ToText.setStyle("-fx-background-color: #708090");
-		ToText.setFont(myFont);
-		Text travellers = new Text("Travellers");
-		travellers.setStyle("-fx-background-color: #708090");
-		travellers.setFont(myFont);
-		Text cabinText = new Text("Cabin");
-		cabinText.setStyle("-fx-background-color: #708090");
-		cabinText.setFont(myFont);
-		Text adultText = new Text("Adult (12+)");
-		Text childText = new Text("Child (2-12)");
-		Text infantText = new Text("Infant (0-2)");
+	public void start(Stage stage) throws Exception {
+		YourList.setVisible(false);
+		delete.setVisible(false);
+		ConfirmList.setVisible(false);
+		GridPane Shop =new GridPane(); 
+		Shop.setVisible(false);
+		Font myFont = new Font("Segoe Print", 15);
+		Font myFont2 = new Font("Segoe Print", 40);
+		Text orderText = new Text("Order your special meal");
+		YourList.setFont(myFont);
+		orderText.setFont(myFont2);
+		Text ticketNOText = new Text("Please enter your ticket number:");
+		ticketNOText.setFont(myFont);
+		TextField ticketNOTextField = new TextField();
+		Alert WarningAlert = new Alert(AlertType.INFORMATION);
+		WarningAlert.setTitle("Confirmation");
+		Image image = new Image(getClass().getResourceAsStream("steak.jpg"),100,100,false,false);
 		
-		DatePicker FromDateCalendar = new DatePicker();
-		DatePicker ToDateCalendar = new DatePicker();
-		
-		ToggleGroup Tgroup = new ToggleGroup();
-        RadioButton oneWay  = new RadioButton("One Way");
-        oneWay.setToggleGroup(Tgroup);
-        RadioButton RoundTrip  = new RadioButton("Round Trip");
-        RoundTrip.setToggleGroup(Tgroup);
-        oneWay.setOnAction(new EventHandler<ActionEvent>() {
-			@Override
-			public void handle(ActionEvent event) {
-				ToDateCalendar.setVisible(false);
-			}
-        });
-        RoundTrip.setOnAction(new EventHandler<ActionEvent>() {
-			@Override
-			public void handle(ActionEvent event) {
-				ToDateCalendar.setVisible(true);
-			}
+		ImageView imgview = new ImageView(image);
+		imgview.maxWidth(50);
+		imgview.maxHeight(50);
+        Button steakButton = new Button();
+        steakButton.setMaxSize(50,50);
+        steakButton.setGraphic(imgview);
+        steakButton.setVisible(false);
+        Text steakPrice = new Text("Steak "+"25 \u00A3");
+        steakPrice.setFont(myFont);
+        steakPrice.setVisible(false);
+        steakButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e) {
+            	WarningAlert.setContentText("This meal is added to your shopping cart");
+				WarningAlert.show();
+				Meal steak = new Meal("Steak",25);
+				ShoppingList.add(steak);
+            }
         });
         
-        ArrayList<String> cities =new ArrayList<>();
-        cities.add("London");
-        cities.add("Munich");
-        cities.add("Stockholm");
-        cities.add("Berlin");
-        cities.add("Amsterdam");
-        cities.add("Paris");
-        cities.add("Birmingham");
-        cities.add("New York");
-        cities.add("Sydney");
-        cities.add("Rome");
-        cities.add("Milan");
-        cities.add("Washington");
-        cities.add("Madrid");
-        cities.add("Athens");
-        cities.add("Nicosia");
-        cities.add("Kiev");
-        cities.add("Prague");
-        cities.add("Vienna");
-        cities.add("Sofia");
-        cities.add("Bucharest");
-        cities.add("Copenhagen");
-        Collections.sort(cities,new Comparator<String>(){
-			@Override
-			public int compare(String s1, String s2) {
-				return s1.compareTo(s2);
-			}
-		});
-        // create a choiceBox 
-        ChoiceBox<String> FromList = new ChoiceBox<>(FXCollections.observableArrayList(cities));
-        ChoiceBox<String> ToList = new ChoiceBox<>(FXCollections.observableArrayList(cities));
-		
-        String numbers[] = {"0","1", "2","3","4","5","6","7","8","9","10"};
-        ChoiceBox<String> numListAdult = new ChoiceBox<>(FXCollections.observableArrayList(numbers));
-        ChoiceBox<String> numListChild = new ChoiceBox<>(FXCollections.observableArrayList(numbers));
-        ChoiceBox<String> numListInfant = new ChoiceBox<>(FXCollections.observableArrayList(numbers));
-        
-        String cabins[] = { "Economy", "Business"};
-        ChoiceBox<String> cabinList = new ChoiceBox<>(FXCollections.observableArrayList(cabins));
-        
-        Button search = new Button("Search Flights");
-        search.setCursor(Cursor.HAND);
-        search.setStyle("-fx-background-color: #B0C4DE");
-        search.setOnAction(new EventHandler<ActionEvent>() {
-			@SuppressWarnings({ "unchecked"})
-			@Override
-			public void handle(ActionEvent event) {
-            	departure="";
-            	if(FromList.getValue()!=null) {
-            		departure=FromList.getValue().toString();
-            	}
-            	destination="";
-            	if(ToList.getValue()!=null) {
-            		destination=ToList.getValue().toString();
-            	}
-            	Fromdate="";
-            	if(FromDateCalendar.getValue()!=null) {
-            		Fromdate=FromDateCalendar.getValue().toString();
-            	}
-            	Todate="";
-            	if(ToDateCalendar.getValue()!=null) {
-            		Todate=ToDateCalendar.getValue().toString();
-            	}
-            	
-            	RadioButton selectedRadioButton = (RadioButton)Tgroup.getSelectedToggle();
-            	if(selectedRadioButton==null) {
-            		travelType="";
-            	}
-            	else {
-            		travelType =selectedRadioButton.getText();
-            	}
-            	
-            	if(numListAdult.getValue()!=null) {
-            		adult=numListAdult.getValue().toString();
-            	}
-            	else
-            		adult = "";
-            	if(numListChild.getValue()!=null) {
-            		child=numListChild.getValue().toString();
-            	}
-            	else
-            		child ="";
-            	if(numListInfant.getValue()!=null) {
-            		infant=numListInfant.getValue().toString();
-            	}
-            	else
-            		infant ="";
-            	if(cabinList.getValue()!=null) {
-            		cabin=cabinList.getValue().toString();
-            	}
-            	
-            	if(departure.equals("") || destination.equals("") || (Fromdate.equals("") & Todate.equals(""))||
-            			travelType.equals("")|| cabin.equals("")||(child.equals("")& adult.equals("")&infant.equals("")) ) {
-            		Alert EmptyFieldAlert = new Alert(AlertType.INFORMATION);
-            		EmptyFieldAlert.setTitle("Warning");
-            		EmptyFieldAlert.setContentText("Please fill out all the blanks");
-            		EmptyFieldAlert.show();
-            	}
-            	else {
-            		int childN=0;
-            		if(!child.equals("")) {
-            			childN = Integer.parseInt(child);
-            		}
-            		int infantN =0;
-            		if(!infant.equals("")) {
-            		infantN = Integer.parseInt(infant);
-            		}
-            		if(Fromdate.compareTo(Todate)==1) {
-                		Alert UnvalidDateAlert = new Alert(AlertType.INFORMATION);
-                		UnvalidDateAlert.setTitle("Warning");
-                		UnvalidDateAlert.setContentText("Please choose a valid date");
-                		UnvalidDateAlert.show();
-            		}
-            		
-            		else if((adult.equals("")|| adult.equals("0"))&& (childN>0 || infantN>0)) {
-            			Alert UnvalidAlert = new Alert(AlertType.INFORMATION);
-                		UnvalidAlert.setTitle("Warning");
-                		UnvalidAlert.setContentText("Children should be accompanied by adults");
-                		UnvalidAlert.show();
-            		}
-            		
-            		else if((adult.equals("")|| adult.equals("0"))&& (child.equals("")|| child.equals("0")&&(infant.equals("")|| infant.equals("0")))) {
-            			Alert UnvalidPassengersAlert = new Alert(AlertType.INFORMATION);
-            			UnvalidPassengersAlert.setTitle("Warning");
-            			UnvalidPassengersAlert.setContentText("Please choose the number of passengers correctly");
-            			UnvalidPassengersAlert.show();
-            		}
-            		else {
-            			String [] info= {"checkFlights",travelType,departure,destination, Fromdate,Todate};
-            			
-            				try {
-            					HomePage.dos.writeObject(info);
-            					dataSet.addAll((ArrayList<Airplane>) HomePage.dis.readObject());
-            				}  catch (IOException e) {
-            					e.printStackTrace();
-            				} catch (ClassNotFoundException e) {
-								e.printStackTrace();
-							}
-            				
-            				if(!dataSet.isEmpty()) {
-            					TableView<Airplane> table = new TableView<Airplane>();
-                    			TableColumn airlineColumn = new TableColumn("Airline");
-                    			airlineColumn.setMinWidth(100);
-                    			airlineColumn.setCellValueFactory(
-            			                new PropertyValueFactory<Airplane, String>("airline"));
-                    			TableColumn departureColumn = new TableColumn("Departure");
-                    			departureColumn.setMinWidth(100);
-                    			departureColumn.setCellValueFactory(
-            			                new PropertyValueFactory<Airplane, String>("departure"));
-                    	        TableColumn destinationColumn = new TableColumn("Destination");
-                    	        destinationColumn.setMinWidth(100);
-                    	        destinationColumn.setCellValueFactory(
-            			                new PropertyValueFactory<Airplane, String>("destination"));
-                    	        TableColumn dateColumn = new TableColumn("Date");
-                    	        dateColumn.setCellValueFactory(
-            			                new PropertyValueFactory<Airplane, String>("date"));
-                    	        TableColumn timeColumn = new TableColumn("Time");
-                    	        timeColumn.setCellValueFactory(
-            			                new PropertyValueFactory<Airplane, String>("time"));
-                    	        TableColumn priceColumn = new TableColumn("Price");
-                    	        priceColumn.setCellValueFactory(
-            			                new PropertyValueFactory<Airplane, Integer>("price"));
-                    	        TableColumn seatsColumn = new TableColumn("Available Seats");
-                    	        seatsColumn.setMinWidth(200);
-            			        seatsColumn.setCellValueFactory(
-            			                new PropertyValueFactory<Airplane, Integer>("availableSeats"));
-            			        TableColumn SelectColumn = new TableColumn("Select");
-            			        SelectColumn.setMinWidth(200);
-            			        SelectColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Airplane, CheckBox>, ObservableValue<CheckBox>>() {
-
-            			            @Override
-            			            public ObservableValue<CheckBox> call(
-            			                    TableColumn.CellDataFeatures<Airplane, CheckBox> box) {
-            			                Airplane user = box.getValue();
-
-            			                CheckBox checkBox = new CheckBox();
-
-            			                checkBox.selectedProperty().setValue(user.isSelect());
-
-            			                checkBox.selectedProperty().addListener(new ChangeListener<Boolean>() {
-            			                    public void changed(ObservableValue<? extends Boolean> ov,
-            			                            Boolean old_val, Boolean new_val) {
-
-            			                        user.setSelect(new_val);
-
-            			                    }
-            			                });
-
-            			                return new SimpleObjectProperty<CheckBox>(checkBox);
-
-            			            }
-
-            			        });
-            			        
-            			        ObservableList<Airplane> dataSetNew = FXCollections.observableArrayList(dataSet);
-            			        table.setItems(dataSetNew);
-                				table.getColumns().addAll(airlineColumn,departureColumn,destinationColumn,dateColumn,timeColumn,priceColumn,seatsColumn,SelectColumn);
-                				
-                				
-                        	      //Creating a Grid Pane 
-                        	        GridPane gridPane2 = new GridPane();    
-                        	      
-                        	        //Setting the vertical and horizontal gaps between the columns 
-                        	        gridPane2.setVgap(5); 
-                        	        gridPane2.setHgap(5);       
-                        	        gridPane2.setPadding(new Insets(10, 10, 10, 10));
-                        	        gridPane2.setStyle("-fx-background-color: #DCDCDC;"+
-                        	        		"-fx-padding: 10;" +
-                        					"-fx-border-style: solid inside;" +
-                        					"-fx-border-width: 2;" +
-                        					"-fx-border-insets: 5;" +
-                        					"-fx-border-radius: 5;" +
-                        					"-fx-border-color: #4B0082;");
-                        	        
-                        	        Button bookPage =new Button("Back to Booking Page");
-                        	        bookPage.setCursor(Cursor.HAND);
-                        	        bookPage.setOnAction(new EventHandler<ActionEvent>() {
-                        	            @Override
-                        	            public void handle(ActionEvent event) {
-                        	            	Booking booking = new Booking();
-                        	            	try {
-                        						booking.start(Stage);
-                        					} catch (Exception e) {
-                        						e.printStackTrace();
-                        					}
-                        	            	Stage.show();
-                        	                
-                        	            }
-
-                        	        });
-                        	        
-                        	        Button confirm =new Button("Confirm");
-                        	        confirm.setCursor(Cursor.HAND);
-                        	        confirm.setOnAction(new EventHandler<ActionEvent>() {
-                        	            @Override
-                        	            public void handle(ActionEvent event) {
-                        	            	ObservableList<Airplane> selectFlights = FXCollections.observableArrayList();
-                        	            	
-                        	        		for(Airplane plane: dataSetNew) {
-                        	        			if(plane.isSelect()) {
-                        	        			selectFlights.add(plane);
-                        	 
-                        	        			}
-                        	        		}
-                        	        		if(selectFlights.size()>2) {
-                        	        			Alert FlightNumAlert = new Alert(AlertType.ERROR);
-                        	        			FlightNumAlert.setTitle("Warning");
-                        	        			FlightNumAlert.setContentText("You cannot choose flights more than two, Please choose your return ticket correctly");
-                        	        			FlightNumAlert.show();
-                        	        		}
-                        	        		else {
-                        	        			Font myFont = new Font("Segoe Print", 20);
-                            	        		Text bank = new Text("Welcome to the \"Safest\" Bank");
-                            	        		bank.setStyle("-fx-background-color: #708090");
-                            	        		bank.setFont(myFont);
-                            	        		Text CardNumberText = new Text("Card Number:");
-                            	        		Text CvvText = new Text("CVV:");
-                            	        		Text CardNameText = new Text("Card holder's name:");
-                            	        		TextField CardNumberTextField = new TextField();
-                            	                TextField CvvTextField = new TextField();
-                            	                TextField CardNameTextField = new TextField();
-                            	                double TotalPrice=0;
-                            	               for (int i=0;i<selectFlights.size();i++) {
-                            	            	   double cost = selectFlights.get(i).getPrice();
-                            	            	   chosenTime[i] = selectFlights.get(i).getTime();
-                            	            	   NameAirLine[i] = selectFlights.get(i).getAirline();
-                            	            	   NOSeats[i] = Integer.toString(selectFlights.get(i).getAvailableSeats());
-                            	            	   if(cabin.equals("Business")) {
-                            	            		   cost = cost*2;
-                            	            	   }
-                            	            	   double Adultcost = 0;
-                            	            	   double ChildrenCost = 0;
-                            	            	   if(!adult.equals("")) {
-                            	            		   int NumberOfAdults = Integer.parseInt(adult);
-                            	            		   Adultcost = NumberOfAdults*cost;
-                            	            	   }
-                            	            	   if(!child.equals("")) {
-                            	            		   int NumberOfChildren = Integer.parseInt(child);
-                            	            		   ChildrenCost = NumberOfChildren*(cost/2);
-                            	            	   }
-                            	            	   TotalPrice += Adultcost +ChildrenCost;
-                            	               }
-                            	               
-                            	               Text TotalPriceText = new Text("Total price for "+ adult+ " adults and "+ child +" children is: "+ TotalPrice);
-                            	               TotalPriceText.setFont(myFont);
-                            	               
-                            	               URL myImg = getClass().getResource("emoji.png");
-                            	       			String myImgUrl = myImg.toExternalForm();
-                            	               Image myImage = new Image(myImgUrl);
-                            	               ImageView MyImgView = new ImageView();
-                            	               MyImgView.setImage(myImage);
-                            	               
-                            	               Button PaymentConfirmation =new Button("Confirm");
-                                   	        	PaymentConfirmation.setCursor(Cursor.HAND);
-                                   	        	PaymentConfirmation.setOnAction(new EventHandler<ActionEvent>() {
-                                   	            @Override
-                                   	            public void handle(ActionEvent event) {
-                                   	            	if(CardNumberTextField.getText().trim().equals("")||CvvTextField.getText().trim().equals("")||CardNameTextField.getText().equals("") ) {
-                                   	            		Alert EmptyFieldAlert2 = new Alert(AlertType.INFORMATION);
-                                   	            		EmptyFieldAlert2.setTitle("Warning");
-                                   	            		EmptyFieldAlert2.setContentText("Please fill out all the blanks");
-                                   	            		EmptyFieldAlert2.show();
-                                   	            	} else if (!NumericCheck.isNumeric(CardNumberTextField.getText().trim()) || CardNumberTextField.getText().trim().length() != 16) {
-                                   	            		Alert EmptyFieldAlert2 = new Alert(AlertType.INFORMATION);
-                                   	            		CardNumberTextField.requestFocus();
-                                   	            		EmptyFieldAlert2.setTitle("Warning");
-                                   	            		EmptyFieldAlert2.setContentText("Please check your card number " + CardNumberTextField.getText().trim().length());
-                                   	            		EmptyFieldAlert2.show();
-                                   	            	} else if (!NumericCheck.isNumeric(CvvTextField.getText().trim()) || CvvTextField.getText().trim().length() != 3) {
-                                   	            		Alert EmptyFieldAlert2 = new Alert(AlertType.INFORMATION);
-                                   	            		CvvTextField.requestFocus();
-                                   	            		EmptyFieldAlert2.setTitle("Warning");
-                                   	            		EmptyFieldAlert2.setContentText("Please check your CVV number");
-                                   	            		EmptyFieldAlert2.show();
-                                   	            	}
-                                   	            	
-                                   	            	else {
-                                   	            		ticketNumber = UUID.randomUUID().toString();
-                                       	            	Text ticketext = new Text("You booked a ticket from "+departure+ " to "+destination);
-                                       	            	
-                                       	            	ticketext.setFont(myFont);
-                                       	            	Text tickeNumbertext = new Text("Your ticket number is: "+ticketNumber);
-                                       	            	tickeNumbertext.setFont(myFont);
-                                       	            	Text informationText = new Text("This ticket is issued for "+HomePage.OnlineUser.getTitle()+" "+HomePage.OnlineUser.getFirstName()+" "+HomePage.OnlineUser.getLastName());
-                                       	            	
-                                       	            	informationText.setFont(myFont);
-                                       	            	Text informationText2 = new Text("Your passport number is: "+HomePage.OnlineUser.getPassportNumber());
-                   
-                                       	            	informationText2.setFont(myFont);
-                                       	            	Text wishText = new Text("Wish you a nice trip :)");
-                                       	            	wishText.setFont(myFont);
-                                       	            	Text ThankYouText = new Text("Thank you for choosing us");
-                                       	            	ThankYouText.setFont(myFont);
-                                       	            	String [] travelersInfo = new String[21];
-                                       	            	if (travelType.equals("Round Trip")) {
-                                       	            	travelersInfo[0]="booking";
-                                       	            	travelersInfo[1] = ticketNumber;
-                                       	            	travelersInfo[2] = HomePage.OnlineUser.getFirstName();
-                                       	            	travelersInfo[3] = HomePage.OnlineUser.getLastName();
-                                       	            	travelersInfo[4]=HomePage.OnlineUser.getPassportNumber();
-                                       	            	travelersInfo[5]=HomePage.OnlineUser.getDateOfBirth();
-                                       	            	travelersInfo[6]=HomePage.OnlineUser.getNationality();
-                                       	            	travelersInfo[7] = departure;
-                                       	            	travelersInfo[8] = destination;
-                                       	            	travelersInfo[9] = Fromdate;
-                                       	            	travelersInfo[10] =Todate;
-                                       	            	travelersInfo[11] = chosenTime[0];
-                                       	            	travelersInfo[12] = chosenTime[1];
-                                       	            	travelersInfo[13] = travelType;
-                                       	            	travelersInfo[14] = "";
-                                       	            	travelersInfo[15] = "";
-                                       	            	travelersInfo[16] = "";
-                                       	            	travelersInfo[17] = NameAirLine[0];
-                                       	            	travelersInfo[18] = NameAirLine[1];
-                                       	            	travelersInfo[19] = NOSeats[0];
-                                       	            	travelersInfo[20] = NOSeats[1];
-                                       	            	}
-                                       	            	else {
-                                           	            	travelersInfo[0]="booking";
-                                           	            	travelersInfo[1] = ticketNumber;
-                                           	            	travelersInfo[2] = HomePage.OnlineUser.getFirstName();
-                                           	            	travelersInfo[3] = HomePage.OnlineUser.getLastName();
-                                           	            	travelersInfo[4]=HomePage.OnlineUser.getPassportNumber();
-                                           	            	travelersInfo[5]=HomePage.OnlineUser.getDateOfBirth();
-                                           	            	travelersInfo[6]=HomePage.OnlineUser.getNationality();
-                                           	            	travelersInfo[7] = departure;
-                                           	            	travelersInfo[8] = destination;
-                                           	            	travelersInfo[9] = Fromdate;
-                                           	            	travelersInfo[10] ="";
-                                           	            	travelersInfo[11] = chosenTime[0];
-                                           	            	travelersInfo[12] = "";
-                                           	            	travelersInfo[13] = travelType;
-                                           	            	travelersInfo[14] = "";
-                                           	            	travelersInfo[15] = "";
-                                           	            	travelersInfo[16] = "";
-                                           	            	travelersInfo[17] = NameAirLine[0];
-                                           	            	travelersInfo[18] = "";
-                                           	            	travelersInfo[19] = NOSeats[0];
-                                           	            	travelersInfo[20] = "";
-                                           	            	}
-                                                			try {
-                                            					HomePage.dos.writeObject(travelersInfo);
-                                            				}  catch (IOException e) {
-                                            					e.printStackTrace();
-                                            				}
-                                       	            	
-                                                			if(travelType.equals("One Way")) {
-                                                				try {
-                                                    				String [] UpdateAirLineTable= {"OneWayUpdate",departure,destination, Fromdate,NameAirLine[0],NOSeats[0]};
-                                                    				HomePage.dos.writeObject(UpdateAirLineTable);
-                                                    			} catch (IOException e) {
-                                                    				e.printStackTrace();
-                                                    			}
-                                                			}
-                                                			else {
-                                                				try {
-                                                    				String [] UpdateAirLineTable= {"ReturnUpdate",departure,destination,Fromdate,Todate,NameAirLine[0],NameAirLine[1],NOSeats[0],NOSeats[1]};
-                                                    				HomePage.dos.writeObject(UpdateAirLineTable);
-                                                    			} catch (IOException e) {
-                                                    				e.printStackTrace();
-                                                    			}
-                                                			}
-                                                			
-                                                			
-                                       	            	Button HomePage3 =new Button("Back to Home Page");
-                                          	             HomePage3.setCursor(Cursor.HAND);
-                                          	             HomePage3.setStyle("-fx-background-color: #B0C4DE");
-                                          	             HomePage3.setOnAction(new EventHandler<ActionEvent>() {
-                                          	                 @Override
-                                          	                 public void handle(ActionEvent event) {
-                                          	                 	HomePageRegisteredUsers BackToHomePage3 = new HomePageRegisteredUsers();
-                                          	     	            	try {
-                                          	     	            		BackToHomePage3.start(Stage);
-                                          	     					} catch (Exception e) {
-                                          	     						e.printStackTrace();
-                                          	     					}
-                                          	     	            	Stage.show();
-                                          	                 }
-
-                                          	             });
-                                       	            	
-                                       	            	GridPane gridPane4 = new GridPane();
-                                       	            	gridPane4.add(ticketext, 1, 1);
-                                       	            	gridPane4.add(tickeNumbertext, 1, 2);
-                                       	            	gridPane4.add(informationText, 1, 3);
-                                       	            	gridPane4.add(informationText2, 1, 4);
-                                       	            	gridPane4.add(wishText, 1, 5);
-                                       	            	gridPane4.add(ThankYouText, 1, 6);
-                                       	            	gridPane4.add(HomePage3, 1, 8);
-                                       	            	gridPane4.setAlignment(Pos.CENTER);
-                                       	            	
-                                       	            	
-                                       	            	StackPane mainroot = new StackPane();
-                                       	            	mainroot.setId("pane");
-                                       	            	mainroot.getChildren().add(gridPane4);
-                                       	            	mainroot.setStyle("-fx-padding: 10;" +
-                                       	     				"-fx-border-style: solid inside;" +
-                                       	 				"-fx-border-width: 2;" +
-                                       	 				"-fx-border-insets: 5;" +
-                                       	 				"-fx-border-radius: 5;" +
-                                       	 				"-fx-border-color: #4B0082;"+
-                                       	 				"-fx-background-color: #DCDCDC;");
-                                       	            	
-                                    	        		TicketPage = new Scene(mainroot, 1200, 600,Color.GAINSBORO);
-                                    	        		TicketPage.getStylesheets().addAll(this.getClass().getResource("style.css").toExternalForm());
-                                            			window.setScene(TicketPage);
-                                   	            	}
-                                   	            }
-
-                                   	        });
-                            	               
-                            	               GridPane gridPane3 = new GridPane();
-                            	               gridPane3.add(bank, 0, 0);
-                            	               gridPane3.add(MyImgView, 1, 0);
-                            	               gridPane3.add(CardNumberText, 0, 1);
-                            	               gridPane3.add(CardNumberTextField, 1, 1);
-                            	               gridPane3.add(CvvText, 0, 2);
-                            	               gridPane3.add(CvvTextField, 1, 2);
-                            	               gridPane3.add(CardNameText, 0, 3);
-                            	               gridPane3.add(CardNameTextField, 1, 3);
-                            	               gridPane3.add(TotalPriceText, 0, 4);
-                            	               gridPane3.add(PaymentConfirmation, 0, 5);
-                            	               gridPane3.setAlignment(Pos.CENTER);
-                            	               
-                            	        		PaymentPage = new Scene(gridPane3, 1200, 600,Color.GAINSBORO);
-                                    			window.setScene(PaymentPage);
-                        	        		}
-                        	                
-                        	            }
-
-                        	        });
-                        	        
-                        	        gridPane2.add(table, 0, 1);
-                        	        gridPane2.add(bookPage,1,1);
-                        	        gridPane2.add(confirm,2,1);
-                        	        BookingPage = new Scene(gridPane2, 1200, 600,Color.GAINSBORO);
-                        			window.setScene(BookingPage);
-            				}
-            				else {
-            					Alert alert = new Alert(AlertType.INFORMATION);
-                                alert.setTitle("Warning");
-                                alert.setContentText("Sorry, There is no available flight");
-                                alert.show();
-            				}
-            		}
-            	}
-			}
-        	
+        Image chickenImage = new Image(getClass().getResourceAsStream("chickenNugget.jpg"),100,100,false,false);
+        ImageView imgview2 = new ImageView(chickenImage);
+		imgview2.maxWidth(30);
+		imgview2.maxHeight(30);
+        Button chickenButton = new Button();
+        chickenButton.setMaxSize(30, 30);
+        chickenButton.setGraphic(imgview2);
+        chickenButton.setMaxSize(50, 50);
+        chickenButton.setVisible(false);
+        Text chickenPrice = new Text("Chicken nuggets "+"15 \u00A3");
+        chickenPrice.setFont(myFont);
+        chickenPrice.setVisible(false);
+        chickenButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e) {
+            	WarningAlert.setContentText("This meal is added to your shopping cart");
+				WarningAlert.show();
+				Meal chicken = new Meal("Chicken",15);
+				ShoppingList.add(chicken);
+            }
         });
         
-        Button HomePage =new Button("Back to Home Page");
-        HomePage.setCursor(Cursor.HAND);
-        HomePage.setStyle("-fx-background-color: #B0C4DE");
-        HomePage.setOnAction(new EventHandler<ActionEvent>() {
+        Image fishImage = new Image(getClass().getResourceAsStream("fishFillet.jpg"),100,100,false,false);
+        ImageView imgview3 = new ImageView(fishImage);
+		imgview3.maxWidth(30);
+		imgview3.maxHeight(30);
+        Button fishButton = new Button();
+        fishButton.setMaxSize(30, 30);
+        fishButton.setGraphic(imgview3);
+        fishButton.setMaxSize(50, 50);
+        fishButton.setVisible(false);
+        Text fishkPrice = new Text("Fish Fillet "+"17.5 \u00A3");
+        fishkPrice.setFont(myFont);
+        fishkPrice.setVisible(false);
+        fishButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e) {
+            	WarningAlert.setContentText("This meal is added to your shopping cart");
+				WarningAlert.show();
+				Meal fish = new Meal("Fish",17.5);
+				ShoppingList.add(fish);
+            }
+        });
+		
+        Image PizzaImage = new Image(getClass().getResourceAsStream("pizza.jpg"),100,100,false,false);
+        ImageView imgview4 = new ImageView(PizzaImage);
+		imgview4.maxWidth(30);
+		imgview4.maxHeight(30);
+        Button pizzaButton = new Button();
+        pizzaButton.setMaxSize(30, 30);
+        pizzaButton.setGraphic(imgview4);
+        pizzaButton.setMaxSize(50, 50);
+        pizzaButton.setVisible(false);
+        Text pizzaPrice = new Text("Pizza "+"13 \u00A3");
+        pizzaPrice.setVisible(false);
+        pizzaPrice.setFont(myFont);
+        pizzaButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e) {
+            	WarningAlert.setContentText("This meal is added to your shopping cart");
+				WarningAlert.show();
+				Meal pizza = new Meal("Pizza",13);
+				ShoppingList.add(pizza);
+            }
+        });
+        
+        HBox hbox = new HBox(50);
+        HBox hbox5 = new HBox(50);
+        hbox.getChildren().add(steakButton);
+        hbox5.getChildren().add(steakPrice);
+        hbox.getChildren().add(chickenButton);
+        hbox5.getChildren().add(chickenPrice);
+        hbox.getChildren().add(fishButton);
+        hbox5.getChildren().add(fishkPrice);
+        hbox.getChildren().add(pizzaButton);
+        hbox5.getChildren().add(pizzaPrice);
+        
+        
+        Image hamburgerImage = new Image(getClass().getResourceAsStream("hamburger.jpg"),100,100,false,false);
+        ImageView imgview5 = new ImageView(hamburgerImage);
+		imgview5.maxWidth(30);
+		imgview5.maxHeight(30);
+        Button hamburgerButton = new Button();
+        hamburgerButton.setMaxSize(30, 30);
+        hamburgerButton.setGraphic(imgview5);
+        hamburgerButton.setMaxSize(50, 50);
+        hamburgerButton.setVisible(false);
+        Text hamburgerPrice = new Text("Hamburger " +"10.25 \u00A3");
+        hamburgerPrice.setFont(myFont);
+        hamburgerPrice.setVisible(false);
+        hamburgerButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e) {
+            	WarningAlert.setContentText("This meal is added to your shopping cart");
+				WarningAlert.show();
+				Meal ham = new Meal("Hamburger",10.25);
+				ShoppingList.add(ham);
+            }
+        });
+        
+        Image soupImage = new Image(getClass().getResourceAsStream("soup.jpg"),100,100,false,false);
+        ImageView imgview6 = new ImageView(soupImage);
+		imgview6.maxWidth(30);
+		imgview6.maxHeight(30);
+        Button soupButton = new Button();
+        soupButton.setMaxSize(30, 30);
+        soupButton.setGraphic(imgview6);
+        soupButton.setMaxSize(50, 50);
+        soupButton.setVisible(false);
+        Text soupPrice = new Text("Soup "+"8 \u00A3");
+        soupPrice.setFont(myFont);
+        soupPrice.setVisible(false);
+        soupButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e) {
+            	WarningAlert.setContentText("This meal is added to your shopping cart");
+				WarningAlert.show();
+				Meal soup = new Meal("Soup",8);
+				ShoppingList.add(soup);
+            }
+        });
+		
+        Image latteImage = new Image(getClass().getResourceAsStream("latte.jpg"),100,100,false,false);
+        ImageView imgview7 = new ImageView(latteImage);
+		imgview7.maxWidth(30);
+		imgview7.maxHeight(30);
+        Button latteButton = new Button();
+        latteButton.setMaxSize(30, 30);
+        latteButton.setGraphic(imgview7);
+        latteButton.setMaxSize(50, 50);
+        latteButton.setVisible(false);
+        Text lattePrice = new Text("Coffee Latte "+ "5.30 \u00A3");
+        lattePrice.setFont(myFont);
+        lattePrice.setVisible(false);
+        latteButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e) {
+            	WarningAlert.setContentText("This meal is added to your shopping cart");
+				WarningAlert.show();
+				Meal latte = new Meal("Latte",5.30);
+				ShoppingList.add(latte);
+            }
+        });
+        
+        Image cokeImage = new Image(getClass().getResourceAsStream("coke.jpg"),100,100,false,false);
+        ImageView imgview8 = new ImageView(cokeImage);
+		imgview8.maxWidth(30);
+		imgview8.maxHeight(30);
+        Button cokeButton = new Button();
+        cokeButton.setMaxSize(30, 30);
+        cokeButton.setGraphic(imgview8);
+        cokeButton.setMaxSize(50, 50);
+        cokeButton.setVisible(false);
+        Text cokePrice = new Text("Coke "+"4 \u00A3");
+        cokePrice.setFont(myFont);
+        cokePrice.setVisible(false);
+        cokeButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e) {
+            	WarningAlert.setContentText("This meal is added to your shopping cart");
+				WarningAlert.show();
+				Meal coke = new Meal("Coke",4);
+				ShoppingList.add(coke);
+            }
+        });
+        
+        HBox hbox2 = new HBox(50);
+        HBox hbox6 = new HBox(50);
+        
+        hbox2.getChildren().add(hamburgerButton);
+        hbox6.getChildren().add(hamburgerPrice);
+        hbox2.getChildren().add(soupButton);
+        hbox6.getChildren().add(soupPrice);
+        hbox2.getChildren().add(latteButton);
+        hbox6.getChildren().add(lattePrice);
+        hbox2.getChildren().add(cokeButton);
+        hbox6.getChildren().add(cokePrice);
+        
+        
+        
+        Image orangeJuiceImage = new Image(getClass().getResourceAsStream("orangeJuice.jpg"),100,100,false,false);
+        ImageView imgview9 = new ImageView(orangeJuiceImage);
+		imgview9.maxWidth(30);
+		imgview9.maxHeight(30);
+        Button orangeJuiceButton = new Button();
+        orangeJuiceButton.setMaxSize(30, 30);
+        orangeJuiceButton.setGraphic(imgview9);
+        orangeJuiceButton.setMaxSize(50, 50);
+        orangeJuiceButton.setVisible(false);
+        Text orangeJuicePrice = new Text("Orange Juice "+"10.25 \u00A3");
+        orangeJuicePrice.setFont(myFont);
+        orangeJuicePrice.setVisible(false);
+        orangeJuiceButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e) {
+            	WarningAlert.setContentText("This meal is added to your shopping cart");
+				WarningAlert.show();
+				Meal Ojuice = new Meal("Orange juice",10.25);
+				ShoppingList.add(Ojuice);
+            }
+        });
+
+        Image appleJuiceImage = new Image(getClass().getResourceAsStream("apple_juice.jpeg"),100,100,false,false);
+        ImageView imgview10 = new ImageView(appleJuiceImage);
+		imgview10.maxWidth(30);
+		imgview10.maxHeight(30);
+        Button appleJuiceButton = new Button();
+        appleJuiceButton.setMaxSize(30, 30);
+        appleJuiceButton.setGraphic(imgview10);
+        appleJuiceButton.setMaxSize(50, 50);
+        appleJuiceButton.setVisible(false);
+        Text appleJuicePrice = new Text("Apple Juice "+"10.25 \u00A3");
+        appleJuicePrice.setFont(myFont);
+        appleJuicePrice.setVisible(false);
+        appleJuiceButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e) {
+            	WarningAlert.setContentText("This meal is added to your shopping cart");
+				WarningAlert.show();
+				Meal Ajuice = new Meal("Apple juice",10.25);
+				ShoppingList.add(Ajuice);
+            }
+        });
+        
+        Image chocImage = new Image(getClass().getResourceAsStream("choc.jpg"),100,100,false,false);
+        ImageView imgview11 = new ImageView(chocImage);
+		imgview11.maxWidth(30);
+		imgview11.maxHeight(30);
+        Button chocButton = new Button();
+        chocButton.setMaxSize(30, 30);
+        chocButton.setGraphic(imgview11);
+        chocButton.setMaxSize(50, 50);
+        chocButton.setVisible(false);
+        Text chocPrice = new Text("Chocolate Cake "+"3 \u00A3");
+        chocPrice.setFont(myFont);
+        chocPrice.setVisible(false);
+        chocButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e) {
+            	WarningAlert.setContentText("This meal is added to your shopping cart");
+				WarningAlert.show();
+				Meal ChocolateCake = new Meal("Chocolate Cake",3);
+				ShoppingList.add(ChocolateCake);
+            }
+        });
+        
+        Image strawberryCakeImage = new Image(getClass().getResourceAsStream("strawberryCake.jpg"),100,100,false,false);
+        ImageView imgview12 = new ImageView(strawberryCakeImage);
+		imgview12.maxWidth(30);
+		imgview12.maxHeight(30);
+        Button strawberryCakeButton = new Button();
+        strawberryCakeButton.setMaxSize(30, 30);
+        strawberryCakeButton.setGraphic(imgview12);
+        strawberryCakeButton.setMaxSize(50, 50);
+        strawberryCakeButton.setVisible(false);
+        Text strawberryCakePrice = new Text("Strawberry Cake "+"6.40 \u00A3");
+        strawberryCakePrice.setFont(myFont);
+        strawberryCakePrice.setVisible(false);
+        strawberryCakeButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e) {
+            	WarningAlert.setContentText("This meal is added to your shopping cart");
+				WarningAlert.show();
+				Meal StrawberryCake = new Meal("Strawberry Cake",6.40);
+				ShoppingList.add(StrawberryCake);
+            }
+        });
+		
+        
+        HBox hbox4 = new HBox(50);
+        HBox hbox8 = new HBox(50);
+        hbox4.getChildren().add(orangeJuiceButton);
+        hbox8.getChildren().add(orangeJuicePrice);
+        hbox4.getChildren().add(appleJuiceButton);
+        hbox8.getChildren().add(appleJuicePrice);
+        hbox4.getChildren().add(chocButton);
+        hbox8.getChildren().add(chocPrice);
+        hbox4.getChildren().add(strawberryCakeButton);
+        hbox8.getChildren().add(strawberryCakePrice);
+        
+        Button  ShoppingCart=new Button("Confirm");
+        ShoppingCart.setCursor(Cursor.HAND);
+        ShoppingCart.setVisible(false);
+        ShoppingCart.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-            	HomePageRegisteredUsers BackToHomePage2 = new HomePageRegisteredUsers();
-	            	try {
-	            		BackToHomePage2.start(Stage);
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-	            	Stage.show();
-                
+            	Shop.setVisible(true);
+            	ConfirmList.setVisible(true);
+            	delete.setVisible(true);
+            	YourList.setVisible(true);
+    			TableColumn MealColumn = new TableColumn("Meal");
+    			MealColumn.setMinWidth(100);
+    			MealColumn.setCellValueFactory(
+		                new PropertyValueFactory<Meal, String>("MealName"));
+    			TableColumn ChooseColumn = new TableColumn("Choose");
+    			ChooseColumn.setMinWidth(200);
+    			ChooseColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Meal, CheckBox>, ObservableValue<CheckBox>>() {
+
+		            @Override
+		            public ObservableValue<CheckBox> call(
+		                    TableColumn.CellDataFeatures<Meal, CheckBox> box) {
+		                Meal user = box.getValue();
+
+		                CheckBox checkBox = new CheckBox();
+
+		                checkBox.selectedProperty().setValue(user.isSelect());
+
+		                checkBox.selectedProperty().addListener(new ChangeListener<Boolean>() {
+		                    public void changed(ObservableValue<? extends Boolean> ov,
+		                            Boolean old_val, Boolean new_val) {
+
+		                        user.setSelect(new_val);
+
+		                    }
+		                });
+
+		                return new SimpleObjectProperty<CheckBox>(checkBox);
+
+		            }
+
+		        });
+		        
+		        ObservableList<Meal> OurData = FXCollections.observableArrayList(ShoppingList);
+		        Mealtable.setItems(OurData);
+				Mealtable.getColumns().addAll(MealColumn,ChooseColumn);
+				
+				
+				
+		        delete.setOnAction(new EventHandler<ActionEvent>() {
+		            @Override
+		            public void handle(ActionEvent event) {
+		            	ObservableList<Meal> selectMeals = FXCollections.observableArrayList();
+    	            	
+    	        		for(Meal m: OurData) {
+    	        			if(m.isSelect()) {
+    	        			selectMeals.add(m);
+    	 
+    	        			}
+    	        		}
+    	        		OurData.removeAll(selectMeals);
+    	        		Mealtable.refresh();
+    	        		 Mealtable.setItems(OurData);
+    	        		 
+		            }
+
+		        });
+		        
+		        ConfirmList.setOnAction(new EventHandler<ActionEvent>() {
+		            @Override
+		            public void handle(ActionEvent event) {
+		            	ObservableList<Meal> FinalselectMeals = FXCollections.observableArrayList();
+		            	for(Meal m: OurData) {
+    	        			if(m.isSelect()) {
+    	        			FinalselectMeals.add(m);
+    	 
+    	        			}
+    	        		}
+		            	Font myFont = new Font("Segoe Print", 20);
+    	        		Text bank = new Text("Welcome to the \"Safest\" Bank");
+    	        		bank.setStyle("-fx-background-color: #708090");
+    	        		bank.setFont(myFont);
+    	        		Text CardNumberText = new Text("Card Number:");
+    	        		Text CvvText = new Text("CVV:");
+    	        		Text CardNameText = new Text("Card holder's name:");
+    	        		TextField CardNumberTextField = new TextField();
+    	                TextField CvvTextField = new TextField();
+    	                TextField CardNameTextField = new TextField();
+    	                
+    	                for (int f=0;f<FinalselectMeals.size();f++) {
+    	                	TotalMealPrice += FinalselectMeals.get(f).getMealprice();
+    	                }
+    	                Text TotalPriceText = new Text("Total price: "+ TotalMealPrice);
+     	               TotalPriceText.setFont(myFont);
+     	               
+     	               URL myImg = getClass().getResource("emoji.png");
+     	       			String myImgUrl = myImg.toExternalForm();
+     	               Image myImage = new Image(myImgUrl);
+     	               ImageView MyImgView = new ImageView();
+     	               MyImgView.setImage(myImage);
+     	               
+     	              Button ConfirmPayment =new Button("Confirm");
+     	             ConfirmPayment.setCursor(Cursor.HAND);
+     	            ConfirmPayment.setStyle("-fx-background-color: #B0C4DE");
+     	           ConfirmPayment.setOnAction(new EventHandler<ActionEvent>() {
+       	                 @Override
+       	                 public void handle(ActionEvent event) {
+       	                	if(CardNumberTextField.getText().equals("")||CvvTextField.getText().equals("")||CardNameTextField.getText().equals("") ) {
+           	            		Alert EmptyFieldAlert2 = new Alert(AlertType.INFORMATION);
+           	            		EmptyFieldAlert2.setTitle("Warning");
+           	            		EmptyFieldAlert2.setContentText("Please fill out all the blanks");
+           	            		EmptyFieldAlert2.show();
+           	            	}
+       	                	else {
+       	                		if(TotalMealPrice==0) {
+       	                			Alert NothingAlert = new Alert(AlertType.CONFIRMATION);
+       	                			NothingAlert.setTitle("Confirmation");
+       	                			NothingAlert.setContentText("You didn't choose any meal");
+       	                			NothingAlert.show();
+           	                		HomePageRegisteredUsers back2 = new HomePageRegisteredUsers();
+                  	                 try {
+           	     	            		back2.start(stage);
+           	     					} catch (Exception e) {
+           	     						e.printStackTrace();
+           	     					}
+           	     	            	stage.show();
+       	                		}
+       	                	else {
+       	                		String FinalMeals="";
+       	                		for (int fm=0;fm<OurData.size();fm++) {
+       	                			FinalMeals =FinalMeals+ OurData.get(fm).getMealName() +" ";
+       	                		}
+       	                		
+       	                		try {
+       	             			String [] entities= {"mealList",FinalMeals,NumberOfTicket};
+       	             			HomePage.dos.writeObject(entities);
+       	             		} catch (IOException e) {
+       	             			e.printStackTrace();
+       	             		}
+       	                		
+       	                		
+       	                		Alert MealConfirmationAlert = new Alert(AlertType.CONFIRMATION);
+       	                		MealConfirmationAlert.setTitle("Confirmation");
+       	                		MealConfirmationAlert.setContentText("Your Special meal is added successfully");
+       	                		MealConfirmationAlert.show();
+       	                		HomePageRegisteredUsers back = new HomePageRegisteredUsers();
+              	                 try {
+       	     	            		back.start(stage);
+       	     					} catch (Exception e) {
+       	     						e.printStackTrace();
+       	     					}
+       	     	            	stage.show();
+       	                	}
+       	                	}
+       	                 }
+
+       	             });
+     	               
+     	              GridPane grid2 = new GridPane();
+     	              grid2.add(bank, 0, 0);
+     	              grid2.add(MyImgView, 1, 0);
+     	              grid2.add(CardNumberText, 0, 1);
+     	              grid2.add(CardNumberTextField, 1, 1);
+     	              grid2.add(CvvText, 0, 2);
+     	              grid2.add(CvvTextField, 1, 2);
+     	              grid2.add(CardNameText, 0, 3);
+     	              grid2.add(CardNameTextField, 1, 3);
+     	              grid2.add(TotalPriceText, 0, 4);
+     	              grid2.add(ConfirmPayment, 0, 5);
+     	              grid2.setAlignment(Pos.CENTER);
+   	               
+   	        		PaymentPage = new Scene(grid2, 1200, 600,Color.GAINSBORO);
+           			stage.setScene(PaymentPage);
+		            }
+
+		        });
+				
+		        Shop.add(YourList,4,0);
+		        Shop.add(Mealtable,4,1);
+		        Shop.add(ConfirmList,4,2);
+		        Shop.add(delete,5,2);
             }
 
         });
-        URL bookingimg = getClass().getResource("Homepage.jpg");
-		String bookingimgUrl = bookingimg.toExternalForm();
-        Image bookingimage = new Image(bookingimgUrl);
-        // defines a viewport into the source image (achieving a "zoom" effect) and
-        // displays it rotated
-        ImageView ivbooking = new ImageView();
-        ivbooking.setImage(bookingimage);
-        ivbooking.setFitWidth(500);
-        ivbooking.setFitHeight(500);
-        ivbooking.setSmooth(true);
-        ivbooking.setCache(true);
-        HBox hbox = new HBox();
-		GridPane gridPane = new GridPane();
-		gridPane.setVgap(5); 
-        gridPane.setHgap(5);       
-        gridPane.setPadding(new Insets(10, 10, 10, 10));
-        gridPane.add(fromText, 0, 0);
-        gridPane.add(FromList, 1, 0);
-        gridPane.add(ToText, 0, 1);
-        gridPane.add(ToList, 1, 1);
-        gridPane.add(oneWay, 0, 2);
-        gridPane.add(RoundTrip, 1, 2);
-        gridPane.add(FromDateCalendar, 0, 3);
-        gridPane.add(To2, 1, 3);
-        gridPane.add(ToDateCalendar, 2, 3);
-        gridPane.add(travellers, 0, 4);
-        gridPane.add(adultText, 0, 5);
-        gridPane.add(numListAdult, 1, 5);
-        gridPane.add(childText, 2, 5);
-        gridPane.add(numListChild, 3, 5);
-        gridPane.add(infantText, 4, 5);
-        gridPane.add(numListInfant, 5, 5);
-        gridPane.add(cabinText, 0, 6);
-        gridPane.add(cabinList, 1, 6);
-        gridPane.add(search, 2, 7);
-        gridPane.add(HomePage, 2, 8);
         
-        gridPane.setStyle("-fx-padding: 10;" +
-				"-fx-border-style: solid inside;" +
-				"-fx-border-width: 2;" +
-				"-fx-border-insets: 5;" +
-				"-fx-border-radius: 5;" +
-				"-fx-border-color: #4B0082;"+
-				"-fx-background-color: #DCDCDC;");
-        
-        gridPane.setAlignment(Pos.CENTER);
-        hbox.setStyle("-fx-padding: 10;" +
-				"-fx-border-style: solid inside;" +
-				"-fx-border-width: 2;" +
-				"-fx-border-insets: 5;" +
-				"-fx-border-radius: 5;" +
-				"-fx-border-color: #4B0082;"+
-				"-fx-background-color: #DCDCDC;");
-        hbox.getChildren().add(gridPane);
-        hbox.getChildren().add(ivbooking);
-        hbox.setAlignment(Pos.CENTER);
-		Group root = new Group(hbox);
-        //Creating a scene object 
-        Scene scene = new Scene(root, 1200, 620, Color.GAINSBORO); 
+        Button  FlightNumberButton=new Button("OK");
+        FlightNumberButton.setCursor(Cursor.HAND);
+        FlightNumberButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+            	boolean checkTicketNum =false;
+            	Alert WarningAlertTicket = new Alert(AlertType.ERROR);
+            	WarningAlertTicket.setTitle("Warning!");
+        		NumberOfTicket = ticketNOTextField.getText();
+        		if(NumberOfTicket.equals("")) {
+        			WarningAlertTicket.setContentText("Please Enter Your Ticket Number");
+        			WarningAlertTicket.show();
+        		}
+        		else {
+        			String [] OrderMealInputs= {"meal",NumberOfTicket};
+                	try {
+        				HomePage.dos.writeObject(OrderMealInputs);
+        				checkTicketNum = (boolean) HomePage.dis.readObject();
+        			} catch (ClassNotFoundException e1) {
+        				e1.printStackTrace();
+        			} catch (IOException e1) {
+        				e1.printStackTrace();
+        			}
+                	if(checkTicketNum==false) {
+                		Alert WarningAlertWrongTicketNumber = new Alert(AlertType.ERROR);
+                		WarningAlertWrongTicketNumber.setTitle("Warning!");
+                		WarningAlertWrongTicketNumber.setContentText("Sorry, You didn't book any flights");
+                		WarningAlertWrongTicketNumber.show();
+                	}
+                	else {
+                		steakButton.setVisible(true);
+                        steakPrice.setVisible(true);
+                        chickenButton.setVisible(true);
+                        chickenPrice.setVisible(true);
+                        fishButton.setVisible(true);
+                        fishkPrice.setVisible(true);
+                        pizzaButton.setVisible(true);
+                        pizzaPrice.setVisible(true);
+                        hamburgerButton.setVisible(true);
+                        hamburgerPrice.setVisible(true);
+                        soupButton.setVisible(true);
+                        soupPrice.setVisible(true);
+                        latteButton.setVisible(true);
+                        lattePrice.setVisible(true);
+                        cokeButton.setVisible(true);
+                        cokePrice.setVisible(true);
+                        orangeJuiceButton.setVisible(true);
+                        orangeJuicePrice.setVisible(true);
+                        appleJuiceButton.setVisible(true);
+                        appleJuicePrice.setVisible(true);
+                        chocButton.setVisible(true);
+                        chocPrice.setVisible(true);
+                        strawberryCakeButton.setVisible(true);
+                        strawberryCakePrice.setVisible(true);
+                        ShoppingCart.setVisible(true);
+                	}
+        		}
+            }
 
-        //Setting title to the Stage 
-        window.setTitle("Booking"); 
+        });
+        VBox vbox = new VBox();
+        vbox.getChildren().add(FlightNumberButton);
         
-        //Adding scene to the stage
-        window.setScene(scene);
-        window.setWidth(1200);
-        window.setHeight(600);
+        GridPane grid = new GridPane();
+        grid.setVgap(5); 
+        grid.setHgap(5);       
+        grid.setPadding(new Insets(10, 10, 10, 10));
+        grid.add(ticketNOText, 0, 0);
+        grid.add(ticketNOTextField, 1, 0);
+        grid.add(FlightNumberButton, 2, 0);
+        grid.add(Shop, 3, 0);
+        grid.add(orderText, 0, 1);
+        
+        grid.add(hbox, 0, 2);
+        grid.add(hbox5, 0, 3);
+        grid.add(hbox2, 0, 4);
+        grid.add(hbox6, 0, 5);
+        grid.add(hbox4, 0, 6);
+        grid.add(hbox8, 0, 7);
+        grid.add(ShoppingCart, 1, 7);
+        grid.setStyle("-fx-background-color: #DCDCDC;"+
+        		"-fx-padding: 10;" +
+				"-fx-border-style: solid inside;" +
+				"-fx-border-width: 2;" +
+				"-fx-border-insets: 5;" +
+				"-fx-border-radius: 5;" +
+				"-fx-border-color: #4B0082;");
+        grid.setAlignment(Pos.CENTER);
+        BorderPane myborder = new BorderPane();
+        myborder.setLeft(grid);
+        myborder.setRight(Shop);
+        Scene scene = new Scene(myborder, 1500, 600, Color.GAINSBORO); 
+        
+        //Setting title to the Stage 
+        stage.setTitle("Your Special Meal"); 
+        //Adding scene to the stage 
+        stage.setScene(scene);
         //Displaying the contents of the stage 
-        window.show();
-		
+        stage.show();
 	}
 
 }
